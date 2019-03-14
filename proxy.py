@@ -4,17 +4,21 @@ import threading
 import os
 
 
-mutualConnections = 10
-bufferSize = 2048
+mutualConnections = 5
+bufferSize = 4096
 
 
 def proxyServer(webserver, port, connection, addr, message):
     try:
-        print('entrou')
         tcpSocket = socket(AF_INET, SOCK_STREAM)
+        print('entrou')
+        print(webserver)
+        print(port)
         tcpSocket.connect((webserver, port))
-        tcpSocket.send(message.encode())
-
+        print('conectou')
+        print(message)
+        tcpSocket.send(message)
+        print('socket criado ok')
         while 1:
             answer = tcpSocket.recv(bufferSize)
 
@@ -33,7 +37,7 @@ def connString(connection, message, addr):
         url = str(message).split('\n')[0].split(' ')[1]
         print('####################')
         print(url)
-        noHttpUrl = url.find('://') # prevents http/https/whatever
+        noHttpUrl = url.find("://") # prevents http/https/whatever
         print(noHttpUrl)
         print('####################')
         if(noHttpUrl == -1):
@@ -45,11 +49,12 @@ def connString(connection, message, addr):
             print('b')
             print(temp)
         
-        portPos = temp.find(':')
-        webserverPos = temp.find('/')
+        portPos = temp.find(":")
+        webserverPos = temp.find("/")
 
         if(webserverPos == -1):
             webserverPos = len(temp)
+            print(webserverPos)
             print('c')
         webserver = ''
         port = -1
@@ -93,9 +98,9 @@ def main():
             #print(message)
             threading._start_new_thread(connString, (connection, message, addr))
         except Exception:
-            print("Something's wrong! Closing server in 2...")
+            print("Something's wrong! Closing server in 1...")
             tcpSerSock.close()
-            sys.exit(2)
+            sys.exit(1)
     
     tcpSerSock.close()
 
