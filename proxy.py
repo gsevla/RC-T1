@@ -8,11 +8,65 @@ mutualConnections = 10
 bufferSize = 2048
 
 
+def proxyServer(webserver, port, connection, addr, message):
+    try:
+        print('entrou')
+        tcpSocket = socket(AF_INET, SOCK_STREAM)
+        tcpSocket.connect((webserver, port))
+        tcpSocket.send(message.encode())
+
+        while 1:
+            answer = tcpSocket.recv(bufferSize)
+
+            if(len(answer) > 0):
+                connection.send(answer)
+                print('tudo alright')
+            else:
+                break
+        tcpSocket.close()
+        connection.close()
+    except Exception:
+        print('huehue')
+
 def connString(connection, message, addr):
     try:
-        print(message.split()[1])
-        filename = str(message.split()[1]).partition("/")[2]
-        print(filename)
+        url = str(message).split('\n')[0].split(' ')[1]
+        print('####################')
+        print(url)
+        noHttpUrl = url.find('://') # prevents http/https/whatever
+        print(noHttpUrl)
+        print('####################')
+        if(noHttpUrl == -1):
+            temp = url
+            print('a')
+            print(temp)
+        else:
+            temp = url[(noHttpUrl+3):]
+            print('b')
+            print(temp)
+        
+        portPos = temp.find(':')
+        webserverPos = temp.find('/')
+
+        if(webserverPos == -1):
+            webserverPos = len(temp)
+            print('c')
+        webserver = ''
+        port = -1
+        print('d')
+        if(portPos == -1 or webserverPos < portPos):
+            port = 80
+            webserver = temp[:webserverPos]
+            print('e')
+        else:
+            port = int((temp[(portPos+1):])[:webserverPos-portPos-1])
+            webserver = temp[:portPos]
+            print('f')
+        print('g')
+        print(webserver)
+        
+        proxyServer(webserver, port, connection, addr, message)
+        
     except Exception:
         print('hue')
 
